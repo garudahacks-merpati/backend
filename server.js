@@ -65,14 +65,14 @@ app.post('/api/user/login', async (req, res) => {
             }).fetchAll();
             const isRegistered = result.resources.length > 0;
             log(`${email} tried to log in. Status: ${isRegistered ? 'success' : 'failed'}`);
-            res.send(isRegistered);
+            res.send(result.resources[0]);
         } else if (phone) {
             const result = await db.container('users').items.query({
                 query: `SELECT * FROM c WHERE c.phone="${phone}"`
             }).fetchAll();
             const isRegistered = result.resources.length > 0;
             log(`${phone} tried to logged in. Status: ${isRegistered ? 'success' : 'failed'}`);
-            res.send(isRegistered);
+            res.send(result.resources[0]);
         } else {
             throw new Error(`Missing field(s)!`);
         }

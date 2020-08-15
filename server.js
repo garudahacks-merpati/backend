@@ -148,7 +148,7 @@ app.get('/api/course/:courseId', async (req, res) => {
     }
 });
 
-app.get('/api/course/:courseId/lesson', (req, res) => {
+app.get('/api/course/:courseId/lesson', async (req, res) => {
     log('[GET] /api/course/:courseId/lesson');
 
     try {
@@ -164,7 +164,7 @@ app.get('/api/course/:courseId/lesson', (req, res) => {
     }
 });
 
-app.post('/api/course/:courseId/lesson', (req, res) => {
+app.post('/api/course/:courseId/lesson', async (req, res) => {
     log('[POST] /api/course/:courseId/lesson');
 
     try {
@@ -187,7 +187,7 @@ app.post('/api/course/:courseId/lesson', (req, res) => {
     }
 });
 
-app.get('/api/lesson/:lessonId',(req, res) => {
+app.get('/api/lesson/:lessonId', async (req, res) => {
     log('[GET] /api/lesson/:lessonId');
 
     try {

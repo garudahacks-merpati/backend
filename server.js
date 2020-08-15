@@ -170,7 +170,7 @@ app.post('/api/course/:courseId/lesson', async (req, res) => {
     try {
         const { courseId } = req.params;
         const { title, text, attachment, dateDue } = req.body;
-        if (!title || !text || !attachment)
+        if (!title || !text || !attachment || !dateDue)
             throw new Error(`Missing field(s)!`);
         await db.container('lessons').items.create({
             title,
@@ -197,6 +197,62 @@ app.get('/api/lesson/:lessonId', async (req, res) => {
         }).fetchAll();
         if (result.resources < 1)
             throw new Error('Lesson not found');
+        res.send(result.resources[0]);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.get('/api/course/:courseId/assignment', async (req, res) => {
+    log('[GET] /api/course/:courseId/assignment');
+
+    try {
+        const { courseId } = req.params;
+        const result = await db.container('assignments').items.query({
+            query: `SELECT * FROM c WHERE c.course="${courseId}"`
+        }).fetchAll();
+        const assignments = result.resources;
+        res.send(assignments);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.post('/api/course/:courseId/assignment', async (req, res) => {
+    log('[POST] /api/course/:courseId/assignment');
+
+    try {
+        const { courseId } = req.params;
+        const { title, text, attachment, dateDue } = req.body;
+        if (!title || !text || !attachment || !dateDue)
+            throw new Error(`Missing field(s)!`);
+        await db.container('assignments').items.create({
+            title,
+            text,
+            attachment,
+            dateDue,
+            course: courseId,
+            datePosted: moment().unix()
+        });
+        res.send(true);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.get('/api/assignment/:assignmentId', async (req, res) => {
+    log('[GET] /api/assignment/:assignmentId');
+
+    try {
+        const { assignmentId } = req.params;
+        const result = await db.container('assignments').items.query({
+            query: `SELECT * FROM c WHERE c.id="${assignmentId}"`
+        }).fetchAll();
+        if (result.resources < 1)
+            throw new Error('Assignment not found');
         res.send(result.resources[0]);
     } catch (err) {
         log(`[ERROR] ${err}`);

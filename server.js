@@ -169,14 +169,13 @@ app.post('/api/course/:courseId/lesson', async (req, res) => {
 
     try {
         const { courseId } = req.params;
-        const { title, text, attachment, dateDue } = req.body;
-        if (!title || !text || !attachment || !dateDue)
+        const { title, text, attachment } = req.body;
+        if (!title || !text || !attachment)
             throw new Error(`Missing field(s)!`);
         await db.container('lessons').items.create({
             title,
             text,
             attachment,
-            dateDue,
             course: courseId,
             datePosted: moment().unix()
         });

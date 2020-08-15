@@ -12,7 +12,7 @@ const cosmosClient = new CosmosClient({
 });
 const db = cosmosClient.database('db');
 
-let logs;
+let logs = '';
 const log = (...msg) => {
     let newLog = '<p>';
     for (m of msg) {
@@ -49,7 +49,7 @@ app.post('/api/user/register', async (req, res) => {
         res.send(true);
     } catch (err) {
         log(`[ERROR] ${err}`);
-        res.status(400).send(err);
+        res.status(400).send(err.message);
     }
 });
 
@@ -77,7 +77,7 @@ app.post('/api/user/login', async (req, res) => {
         }
     } catch (err) {
         log(`[ERROR] ${err}`);
-        res.status(400).send(err);
+        res.status(400).send(err.message);
     }
 });
 
@@ -97,7 +97,7 @@ app.post('/api/course', async (req, res) => {
         res.send(true);
     } catch (err) {
         log(`[ERROR] ${err}`);
-        res.status(400).send(err);
+        res.status(400).send(err.message);
     }
 });
 
@@ -111,7 +111,7 @@ app.get('/api/course', async (req, res) => {
         res.send(result.resources);
     } catch (err) {
         log(`[ERROR] ${err}`);
-        res.status(400).send(err);
+        res.status(400).send(err.message);
     }
 });
 
@@ -123,6 +123,8 @@ app.get('/api/course/:courseId', async (req, res) => {
         const result = await db.container('courses').items.query({
             query: `SELECT * FROM c WHERE c.id="${courseId}"`
         }).fetchAll();
+        if (result.resources < 1)
+            throw new Error('Course not found');
         const course = result.resources[0];
         const instructorId = course.instructor;
         const result2 = await db.container('users').items.query({
@@ -132,7 +134,7 @@ app.get('/api/course/:courseId', async (req, res) => {
         res.send(course);
     } catch (err) {
         log(`[ERROR] ${err}`);
-        res.status(400).send(err);
+        res.status(400).send(err.message);
     }
 });
 

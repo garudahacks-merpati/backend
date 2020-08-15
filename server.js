@@ -1,5 +1,6 @@
 const express = require('express');
 const CosmosClient = require('@azure/cosmos').CosmosClient;
+const moment = require('moment');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
@@ -108,7 +109,16 @@ app.get('/api/course', async (req, res) => {
         const result = await db.container('courses').items.query({
             query: `SELECT * FROM c`
         }).fetchAll();
-        res.send(result.resources);
+        const courses = result.resources;
+        for (const course of courses)
+        {
+            const instructorId = course.instructor;
+            const result2 = await db.container('users').items.query({
+                query: `SELECT * FROM c WHERE c.id="${instructorId}"`
+            }).fetchAll();
+            course.instructor = result2.resources[0];
+        }
+        res.send(courses);
     } catch (err) {
         log(`[ERROR] ${err}`);
         res.status(400).send(err.message);
@@ -132,6 +142,62 @@ app.get('/api/course/:courseId', async (req, res) => {
         }).fetchAll();
         course.instructor = result2.resources[0];
         res.send(course);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.get('/api/course/:courseId/lesson', (req, res) => {
+    log('[GET] /api/course/:courseId/lesson');
+
+    try {
+        const { courseId } = req.params;
+        const result = await db.container('lessons').items.query({
+            query: `SELECT * FROM c WHERE c.course="${courseId}"`
+        }).fetchAll();
+        const lessons = result.resources;
+        res.send(lessons);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.post('/api/course/:courseId/lesson', (req, res) => {
+    log('[POST] /api/course/:courseId/lesson');
+
+    try {
+        const { courseId } = req.params;
+        const { title, text, attachment, dateDue } = req.body;
+        if (!title || !text || !attachment)
+            throw new Error(`Missing field(s)!`);
+        await db.container('lessons').items.create({
+            title,
+            text,
+            attachment,
+            dateDue,
+            course: courseId,
+            datePosted: moment().unix()
+        });
+        res.send(true);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.get('/api/lesson/:lessonId',(req, res) => {
+    log('[GET] /api/lesson/:lessonId');
+
+    try {
+        const { lessonId } = req.params;
+        const result = await db.container('lessons').items.query({
+            query: `SELECT * FROM c WHERE c.id="${lessonId}"`
+        }).fetchAll();
+        if (result.resources < 1)
+            throw new Error('Lesson not found');
+        res.send(result.resources[0]);
     } catch (err) {
         log(`[ERROR] ${err}`);
         res.status(400).send(err.message);

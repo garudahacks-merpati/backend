@@ -291,7 +291,6 @@ app.get('/api/course/:courseId/user', async (req, res) => {
             query: `SELECT * FROM c WHERE c.course="${courseId}"`
         }).fetchAll();
         const userToCourses = result.resources;
-        const userToCourses = result.resources;
         const users = await Promise.all(userToCourses.map(userToCourse => new Promise(async (resolve, reject) => {
             const result2 = await db.container('users').items.query({
                 query: `SELECT * FROM c WHERE c.id="${userToCourse.user}"`

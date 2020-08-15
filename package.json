@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/garudahacks-merpati/backend#readme",
   "dependencies": {
+    "@azure/cosmos": "^3.9.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1"
   }
 }

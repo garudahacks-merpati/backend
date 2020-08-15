@@ -260,6 +260,69 @@ app.get('/api/assignment/:assignmentId', async (req, res) => {
     }
 });
 
+app.get('/api/user/:userId/course', async (req, res) => {
+    log('[GET] /api/user/:userId/course');
+
+    try {
+        const { userId } = req.params;
+        const result = await db.container('userToCourses').items.query({
+            query: `SELECT * FROM c WHERE c.user="${userId}"`
+        }).fetchAll();
+        const userToCourses = result.resources;
+        const courses = await Promise.all(userToCourses.map(userToCourse => new Promise((resolve, reject => {
+            const result2 = await db.container('courses').items.query({
+                query: `SELECT * FROM c WHERE c.id="${userToCourse.course}"`
+            }).fetchAll();
+            resolve(result2.resources[0]);
+        }))));
+        res.send(courses);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.get('/api/course/:courseId/user', async (req, res) => {
+    log('[GET] /api/course/:courseId/user');
+
+    try {
+        const { courseId } = req.params;
+        const result = await db.container('userToCourses').items.query({
+            query: `SELECT * FROM c WHERE c.course="${courseId}"`
+        }).fetchAll();
+        const userToCourses = result.resources;
+        const userToCourses = result.resources;
+        const users = await Promise.all(userToCourses.map(userToCourse => new Promise((resolve, reject => {
+            const result2 = await db.container('users').items.query({
+                query: `SELECT * FROM c WHERE c.id="${userToCourse.user}"`
+            }).fetchAll();
+            resolve(result2.resources[0]);
+        }))));
+        res.send(users);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
+app.post('/api/userToCourse/', async (req, res) => {
+    log('[POST] /api/userToCourse/');
+
+    try {
+        const { user, course } = req.body;
+        if (!user || !course)
+            throw new Error(`Missing field(s)!`);
+        await db.container('userToCourses').items.create({
+            user,
+            course
+        });
+        res.send(true);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
 app.listen(PORT, () => {
     log(`Server running on port ${PORT}.`);
 });

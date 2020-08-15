@@ -1,0 +1,22 @@
+{
+  "name": "merpati-backend",
+  "version": "1.0.0",
+  "description": "Server for Merpati, a GarudaHacks project.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garudahacks-merpati/backend.git"
+  },
+  "author": "Nadya Djojosantoso <hello@nadyafebi.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/garudahacks-merpati/backend/issues"
+  },
+  "homepage": "https://github.com/garudahacks-merpati/backend#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

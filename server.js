@@ -36,6 +36,8 @@ app.post('/api/user/register', async (req, res) => {
 
     try {
         const { firstName, lastName, email, phone, userType } = req.body;
+        if (!firstName || !lastName || !email || !phone || !userType)
+            throw new Error(`Missing field(s)!`);
         await db.container('users').items.create({
             firstName,
             lastName,
@@ -46,8 +48,8 @@ app.post('/api/user/register', async (req, res) => {
         log(`${email} registered successfully.`);
         res.send(true);
     } catch (err) {
-        log(`${email} failed to register.`);
-        res.status(400).send(false);
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err);
     }
 });
 
@@ -71,10 +73,66 @@ app.post('/api/user/login', async (req, res) => {
             log(`${phone} tried to logged in. Status: ${isRegistered ? 'success' : 'failed'}`);
             res.send(isRegistered);
         } else {
-            res.status(400).send(false);
+            throw new Error(`Missing field(s)!`);
         }
     } catch (err) {
-        res.status(400).send(false);
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err);
+    }
+});
+
+app.post('/api/course', async (req, res) => {
+    log('[POST] /api/course');
+
+    try {
+        const { name, image, instructor } = req.body;
+        if (!name || !image || !instructor)
+            throw new Error(`Missing field(s)!`);
+        await db.container('courses').items.create({
+            name,
+            image,
+            instructor
+        });
+        log(`Course ${name} added.`);
+        res.send(true);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err);
+    }
+});
+
+app.get('/api/course', async (req, res) => {
+    log('[GET] /api/course');
+
+    try {
+        const result = await db.container('courses').items.query({
+            query: `SELECT * FROM c`
+        }).fetchAll();
+        res.send(result.resources);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err);
+    }
+});
+
+app.get('/api/course/:courseId', async (req, res) => {
+    log('[GET] /api/course/:courseId');
+
+    try {
+        const { courseId } = req.params;
+        const result = await db.container('courses').items.query({
+            query: `SELECT * FROM c WHERE c.id="${courseId}"`
+        }).fetchAll();
+        const course = result.resources[0];
+        const instructorId = course.instructor;
+        const result2 = await db.container('users').items.query({
+            query: `SELECT * FROM c WHERE c.id="${instructorId}"`
+        }).fetchAll();
+        course.instructor = result2.resources[0];
+        res.send(course);
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err);
     }
 });
 

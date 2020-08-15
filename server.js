@@ -321,6 +321,28 @@ app.post('/api/userToCourse/', async (req, res) => {
     }
 });
 
+app.get('/api/user/:userId/assignment', async (req, res) => {
+    log('[GET] /api/user/:userId/assignment');
+
+    try {
+        const { userId } = req.params;
+        const result = await db.container('userToCourses').items.query({
+            query: `SELECT * FROM c WHERE c.user="${userId}"`
+        }).fetchAll();
+        const userToCourses = result.resources;
+        const assignmentList = await Promise.all(userToCourses.map(userToCourse => new Promise(async (resolve, reject) => {
+            const result2 = await db.container('assignments').items.query({
+                query: `SELECT * FROM c WHERE c.course="${userToCourse.course}"`
+            }).fetchAll();
+            resolve(result2.resources);
+        })));
+        res.send([].concat(...assignmentList));
+    } catch (err) {
+        log(`[ERROR] ${err}`);
+        res.status(400).send(err.message);
+    }
+});
+
 app.listen(PORT, () => {
     log(`Server running on port ${PORT}.`);
 });

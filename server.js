@@ -269,12 +269,12 @@ app.get('/api/user/:userId/course', async (req, res) => {
             query: `SELECT * FROM c WHERE c.user="${userId}"`
         }).fetchAll();
         const userToCourses = result.resources;
-        const courses = await Promise.all(userToCourses.map(userToCourse => new Promise((resolve, reject => {
+        const courses = await Promise.all(userToCourses.map(userToCourse => new Promise(async (resolve, reject) => {
             const result2 = await db.container('courses').items.query({
                 query: `SELECT * FROM c WHERE c.id="${userToCourse.course}"`
             }).fetchAll();
             resolve(result2.resources[0]);
-        }))));
+        })));
         res.send(courses);
     } catch (err) {
         log(`[ERROR] ${err}`);
@@ -292,12 +292,12 @@ app.get('/api/course/:courseId/user', async (req, res) => {
         }).fetchAll();
         const userToCourses = result.resources;
         const userToCourses = result.resources;
-        const users = await Promise.all(userToCourses.map(userToCourse => new Promise((resolve, reject => {
+        const users = await Promise.all(userToCourses.map(userToCourse => new Promise(async (resolve, reject) => {
             const result2 = await db.container('users').items.query({
                 query: `SELECT * FROM c WHERE c.id="${userToCourse.user}"`
             }).fetchAll();
             resolve(result2.resources[0]);
-        }))));
+        })));
         res.send(users);
     } catch (err) {
         log(`[ERROR] ${err}`);
